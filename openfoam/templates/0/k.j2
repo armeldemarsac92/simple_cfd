@@ -1,0 +1,19 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class volScalarField;
+    object k;
+}
+dimensions [0 2 -2 0 0 0 0];
+internalField uniform {{ turbulent_k_m2_s2 }};
+boundaryField
+{
+    inlet { type fixedValue; value uniform {{ turbulent_k_m2_s2 }}; }
+    outlet { type inletOutlet; inletValue uniform {{ turbulent_k_m2_s2 }}; value uniform {{ turbulent_k_m2_s2 }}; }
+    sideMin { type zeroGradient; }
+    sideMax { type zeroGradient; }
+    bottom { type zeroGradient; }
+    top { type zeroGradient; }
+    hull { type kqRWallFunction; value uniform {{ turbulent_k_m2_s2 }}; }
+}

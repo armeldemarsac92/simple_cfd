@@ -1,0 +1,34 @@
+forces
+{
+    type forces;
+    libs (forces);
+    executeControl timeStep;
+    executeInterval {{ force_write_interval }};
+    writeControl timeStep;
+    writeInterval {{ force_write_interval }};
+    patches (hull);
+    rho rhoInf;
+    rhoInf {{ density_kg_m3 }};
+    CofR (0 0 0);
+    log yes;
+}
+forceCoeffs
+{
+    type forceCoeffs;
+    libs (forces);
+    executeControl timeStep;
+    executeInterval {{ force_write_interval }};
+    writeControl timeStep;
+    writeInterval {{ force_write_interval }};
+    patches (hull);
+    rho rhoInf;
+    rhoInf {{ density_kg_m3 }};
+    CofR (0 0 0);
+    dragDir (1 0 0);
+    liftDir (0 0 1);
+    pitchAxis (0 1 0);
+    magUInf {{ speed_m_s }};
+    lRef {{ reference_length_m }};
+    Aref {{ reference_area_m2 }};
+    log yes;
+}

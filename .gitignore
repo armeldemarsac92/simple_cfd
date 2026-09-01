@@ -1,0 +1,14 @@
+.cache/
+.venv/
+.agents/
+.codex/
+.superpowers/
+docs/superpowers/
+__pycache__/
+*.py[cod]
+runs/*
+!runs/.gitkeep
+results/*
+!results/.gitkeep
+hulls/inbox/*
+!hulls/inbox/.gitkeep

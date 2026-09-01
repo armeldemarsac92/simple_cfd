@@ -1,0 +1,78 @@
+# AUV hydrodynamic analysis — {{ run_id }}
+
+Status: **{{ status }}**  
+Design: `{{ geometry.source.name }}` (`{{ geometry.source_sha256 }}`)  
+Model: `{{ model_label }}`  
+OpenFOAM: {{ runtime.version }}, build `{{ runtime.build }}`
+
+This is a smooth, fully turbulent, fixed-hull URANS prediction and has not been validated against experiments.
+
+## Operating point and assumptions
+
+- Fully submerged hull, centreline depth: {{ "%.3f"|format(depth_m) }} m
+- Seawater: {{ "%.3f"|format(density) }} kg/m³, kinematic viscosity {{ "%.6g"|format(nu) }} m²/s
+- Fixed hull at 0° pitch and yaw; relative flow along normalized +X
+- Transient incompressible single-phase URANS, SST k-omega, smooth wall functions
+- Second-order time integration; drag reported as an autocorrelation-aware time mean
+- Cavitation value is a static-pressure screen; no multiphase cavitation model
+- No free surface, appendages, propulsion, control-surface deflection, transition, roughness, manoeuvring, or experimental validation
+
+## Geometry
+
+| Quantity | Value |
+|---|---:|
+| Bow in source coordinates | {{ geometry.bow_original_axis }} (confidence {{ "%.4f"|format(geometry.bow_confidence) }}) |
+| Length | {{ "%.6f"|format(geometry.length_m) }} m |
+| Width | {{ "%.6f"|format(geometry.normalized_extents_m[1]) }} m |
+| Height | {{ "%.6f"|format(geometry.normalized_extents_m[2]) }} m |
+| Frontal area | {{ "%.9f"|format(geometry.frontal_area_m2) }} m² |
+| Wetted area | {{ "%.9f"|format(geometry.wetted_area_m2) }} m² |
+| Enclosed volume | {{ "%.9f"|format(geometry.volume_m3) }} m³ |
+
+![Geometry orientation]({{ geometry_preview }})
+
+## Mesh qualification
+
+| Grid | Cells | Hull faces | Layer coverage | Max non-orthogonality | Max skewness | All-geometry determinant (diagnostic) |
+|---|---:|---:|---:|---:|---:|---:|
+{% for mesh in meshes -%}
+| {{ mesh.profile.value }} | {{ mesh.cell_count }} | {{ mesh.surface_face_count }} | {{ "%.2f"|format(mesh.layer_coverage_fraction * 100) }}% | {{ "%.4f"|format(mesh.max_non_orthogonality) }}° | {{ "%.4f"|format(mesh.max_skewness) }} | {{ "%.6g"|format(mesh.diagnostic_min_wellposedness_determinant) }} |
+{% endfor %}
+
+![Mesh and grid qualification]({{ summary_plots.mesh_grid }})
+
+Grid-study scope: **1.00 m/s only** (`reference_speed_only`).  
+Classification: **{{ grid.classification }}**; observed order: {{ grid.observed_order }}; fine GCI: {{ grid.fine_gci_percent }}%; accepted: **{{ grid.accepted }}**.  
+Decision: {{ grid.reason }}
+
+## Hydrodynamic results
+
+| Speed (m/s) | Re | Mean drag (N) | Mean pressure (N) | Mean viscous (N) | Cd | Mean convergence uncertainty | Stationary sample (L/U) | y+ median | min abs pressure (Pa) | Cavitation margin (Pa) | Status |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+{% for case in production_cases -%}
+| {{ "%.2f"|format(case.speed_m_s) }} | {{ "%.7g"|format(case.reynolds_number) }} | {{ "%.8g"|format(case.drag_n) }} | {{ "%.8g"|format(case.force_pressure_n[0]) }} | {{ "%.8g"|format(case.force_viscous_n[0]) }} | {{ "%.8g"|format(case.drag_coefficient) }} | {{ "%.3f"|format(case.force_mean_uncertainty_fraction * 100) }}% | {{ "%.3f"|format(case.force_stationary_duration_flow_times) }} | {{ "%.6g"|format(case.yplus.median) }} | {{ "%.9g"|format(case.minimum_absolute_pressure_pa) }} | {{ "%.9g"|format(case.cavitation_margin_pa) }} | {{ "accepted" if case.accepted else case.rejection_code }} |
+{% endfor %}
+
+![Drag, coefficient and power sweep]({{ summary_plots.sweep }})
+
+## Per-case numerical and flow evidence
+
+{% for item in case_artifacts -%}
+### {{ item.case.mesh_profile.value }} — {{ "%.2f"|format(item.case.speed_m_s) }} m/s
+
+Numerical history: [plot]({{ item.diagnostics_plot }}); raw case: [ParaView marker]({{ item.case_marker }}), [hull VTK]({{ item.hull_vtk }}), [longitudinal plane VTK]({{ item.plane_vtk }}).
+
+{% if item.cp_png %}![Hull Cp]({{ item.cp_png }}){% endif %}
+{% if item.wall_shear_png %}![Hull wall shear]({{ item.wall_shear_png }}){% endif %}
+{% if item.yplus_png %}![Hull y+]({{ item.yplus_png }}){% endif %}
+{% if item.flow_png %}![Longitudinal flow]({{ item.flow_png }}){% endif %}
+
+{% if item.warnings %}Visualization warnings: {{ item.warnings|join(", ") }}{% endif %}
+
+{% endfor %}
+## Reproducibility
+
+- Configuration SHA-256: `{{ configuration.digest }}`
+- Pipeline manifest: `{{ manifest_path }}`
+- Grid-study evidence: `{{ grid_path }}`
+- Every CFD case contains command logs, force/residual histories, structured results, final reconstructed fields, and visualization metadata.

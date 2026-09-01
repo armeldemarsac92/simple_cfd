@@ -1,0 +1,36 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class dictionary;
+    object fvSolution;
+}
+solvers
+{
+    p { solver GAMG; smoother GaussSeidel; tolerance 1e-8; relTol 0.01; }
+    pFinal { $p; relTol 0; }
+    Phi { $p; }
+    U { solver smoothSolver; smoother GaussSeidel; tolerance 1e-8; relTol 0.1; nSweeps 1; }
+    UFinal { $U; relTol 0; }
+    k { solver smoothSolver; smoother GaussSeidel; tolerance 1e-8; relTol 0.1; nSweeps 1; }
+    kFinal { $k; relTol 0; }
+    omega { solver smoothSolver; smoother GaussSeidel; tolerance 1e-8; relTol 0.1; nSweeps 1; }
+    omegaFinal { $omega; relTol 0; }
+    cellDisplacement
+    {
+        solver PCG;
+        preconditioner DIC;
+        tolerance 1e-8;
+        relTol 0;
+        minIter 2;
+    }
+}
+PIMPLE
+{
+    momentumPredictor yes;
+    nOuterCorrectors 1;
+    nCorrectors 2;
+    nNonOrthogonalCorrectors 1;
+}
+potentialFlow { nNonOrthogonalCorrectors 10; }
+cache { grad(U); }

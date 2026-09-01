@@ -1,0 +1,91 @@
+schema_version = 2
+model_label = "smooth_fully_turbulent_fixed_hull_urans"
+openfoam_version = "2512"
+openfoam_bashrc = "/usr/lib/openfoam/openfoam2512/etc/bashrc"
+mpi_ranks = 8
+
+[fluid]
+density_kg_m3 = 1025.0
+kinematic_viscosity_m2_s = 1.17e-6
+temperature_c = 15.0
+salinity_psu = 35.0
+gravity_m_s2 = 9.80665
+atmospheric_pressure_pa = 101325.0
+vapour_pressure_pa = 1705.0
+
+[operating]
+centerline_depth_m = 5.0
+speeds_m_s = [0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00]
+reference_speed_m_s = 1.00
+pitch_deg = 0.0
+yaw_deg = 0.0
+turbulence_intensity = 0.01
+turbulence_length_fraction = 0.07
+
+[geometry]
+axis_dominance_min = 1.5
+bow_confidence_min = 0.70
+cap_weight = 0.50
+taper_weight = 0.30
+curvature_weight = 0.20
+terminal_fraction = 0.20
+step_chord_fraction = 0.0005
+step_angle_deg = 5.0
+minimum_length_m = 0.05
+maximum_length_m = 20.0
+
+[domain]
+upstream_lengths = 5.0
+downstream_lengths = 10.0
+radial_lengths = 5.0
+maximum_blockage = 0.01
+
+[mesh]
+refinement_ratio = 1.4142135623730951
+medium_farfield_cell_fraction = 0.45
+surface_level_min = 5
+surface_level_max = 6
+nearbody_level = 4
+wake_level = 5
+nearbody_streamwise_padding_lengths = 0.25
+nearbody_transverse_padding_diameters = 0.50
+wake_start_fraction = 0.50
+wake_lengths = 3.0
+wake_half_width_diameters = 1.50
+surface_layers = 8
+maximum_layer_growth_ratio = 1.15
+maximum_final_layer_thickness_fraction = 0.50
+target_yplus_at_min_speed = 40.0
+max_global_cells_coarse = 2500000
+max_global_cells_medium = 5000000
+max_global_cells_fine = 9000000
+max_non_orthogonality = 70.0
+max_internal_skewness = 4.0
+minimum_determinant = 0.001
+minimum_layer_coverage_fraction = 0.80
+
+[solver]
+time_step_flow_fraction = 0.005
+force_write_interval = 1
+field_average_window_flow_times = 1.0
+first_convergence_check_flow_times = 1.0
+checkpoint_flow_times = 0.25
+maximum_flow_times = 20.0
+drag_running_mean_uncertainty_fraction = 0.005
+drag_mean_drift_fraction = 0.005
+target_courant_number = 1.0
+maximum_courant_number = 1.5
+minimum_yplus_median = 30.0
+maximum_yplus_median = 180.0
+minimum_yplus_30_to_300_fraction = 0.75
+preferred_yplus_above_300_fraction = 0.05
+maximum_yplus_above_300_fraction = 0.25
+
+[qualification]
+maximum_fine_gci_percent = 5.0
+maximum_refinement_ratio_deviation = 0.10
+
+[storage]
+database = "results/results.sqlite"
+summary_csv = "results/summary.csv"
+comparison_html = "results/comparison.html"

@@ -1,0 +1,87 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class dictionary;
+    object snappyHexMeshDict;
+}
+castellatedMesh true;
+snap true;
+addLayers true;
+geometry
+{
+    hull.stl { type triSurfaceMesh; name hull; }
+    nearBody { type searchableBox; min {{ nearbody_min_m }}; max {{ nearbody_max_m }}; }
+    wakeBox { type searchableBox; min {{ wake_min_m }}; max {{ wake_max_m }}; }
+}
+castellatedMeshControls
+{
+    maxLocalCells {{ max_global_cells }};
+    maxGlobalCells {{ max_global_cells }};
+    minRefinementCells 10;
+    maxLoadUnbalance 0.10;
+    nCellsBetweenLevels 4;
+    features ({ file "hull.eMesh"; level {{ surface_level_max }}; });
+    refinementSurfaces
+    {
+        hull { level ({{ surface_level_min }} {{ surface_level_max }}); patchInfo { type wall; } }
+    }
+    resolveFeatureAngle 60;
+    refinementRegions
+    {
+        nearBody { mode inside; levels ((1e15 {{ nearbody_level }})); }
+        wakeBox { mode inside; levels ((1e15 {{ wake_level }})); }
+    }
+    locationInMesh {{ location_in_mesh_m }};
+    allowFreeStandingZoneFaces true;
+}
+snapControls
+{
+    nSmoothPatch 3;
+    nSmoothInternal 3;
+    tolerance 2.0;
+    nSolveIter 30;
+    nRelaxIter 5;
+    nFeatureSnapIter 10;
+    nFaceSplitInterval 5;
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+    multiRegionFeatureSnap false;
+}
+addLayersControls
+{
+    relativeSizes false;
+    layers { hull { nSurfaceLayers {{ surface_layers }}; } }
+    thicknessModel firstAndRelativeFinal;
+    firstLayerThickness {{ first_layer_thickness_m }};
+    finalLayerThickness {{ final_layer_thickness_fraction }};
+    minThickness {{ minimum_layer_thickness_m }};
+    featureAngle 60;
+    nLayerIter 80;
+    nOuterIter 4;
+    nGrow 0;
+    nRelaxIter 3;
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals 3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    meshShrinker displacementMotionSolver;
+    solver displacementLaplacian;
+    displacementLaplacianCoeffs
+    {
+        diffusivity quadratic inverseDistance (hull);
+    }
+    nBufferCellsNoExtrude 0;
+}
+meshQualityControls
+{
+    #includeEtc "caseDicts/meshQualityDict"
+    maxNonOrtho {{ maximum_non_orthogonality }};
+    maxInternalSkewness {{ maximum_internal_skewness }};
+    minDeterminant {{ minimum_determinant }};
+    minFaceWeight 0.02;
+    nSmoothScale 4;
+    errorReduction 0.75;
+}
+writeFlags (scalarLevels layerSets layerFields);
+mergeTolerance 1e-6;

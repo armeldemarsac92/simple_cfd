@@ -1,0 +1,19 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class volVectorField;
+    object U;
+}
+dimensions [0 1 -1 0 0 0 0];
+internalField uniform {{ speed_vector }};
+boundaryField
+{
+    inlet { type fixedValue; value uniform {{ speed_vector }}; }
+    outlet { type inletOutlet; inletValue uniform (0 0 0); value uniform {{ speed_vector }}; }
+    sideMin { type slip; }
+    sideMax { type slip; }
+    bottom { type slip; }
+    top { type slip; }
+    hull { type noSlip; }
+}

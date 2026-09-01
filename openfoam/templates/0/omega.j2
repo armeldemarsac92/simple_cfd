@@ -1,0 +1,19 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class volScalarField;
+    object omega;
+}
+dimensions [0 0 -1 0 0 0 0];
+internalField uniform {{ turbulent_omega_s1 }};
+boundaryField
+{
+    inlet { type fixedValue; value uniform {{ turbulent_omega_s1 }}; }
+    outlet { type inletOutlet; inletValue uniform {{ turbulent_omega_s1 }}; value uniform {{ turbulent_omega_s1 }}; }
+    sideMin { type zeroGradient; }
+    sideMax { type zeroGradient; }
+    bottom { type zeroGradient; }
+    top { type zeroGradient; }
+    hull { type omegaWallFunction; value uniform {{ turbulent_omega_s1 }}; }
+}

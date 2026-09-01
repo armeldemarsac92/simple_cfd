@@ -1,0 +1,96 @@
+FoamFile
+{
+    version 2.0;
+    format ascii;
+    class dictionary;
+    object controlDict;
+}
+application pimpleFoam;
+startFrom startTime;
+startTime 0;
+stopAt endTime;
+endTime {{ first_checkpoint_time_s }};
+deltaT {{ time_step_s }};
+writeControl adjustableRunTime;
+writeInterval {{ write_interval_s }};
+purgeWrite 2;
+writeFormat binary;
+writePrecision 8;
+writeCompression off;
+timeFormat general;
+timePrecision 12;
+runTimeModifiable true;
+adjustTimeStep yes;
+maxCo {{ target_courant_number }};
+maxDeltaT {{ time_step_s }};
+functions
+{
+    #include "forces"
+    solverInfo
+    {
+        type solverInfo;
+        libs (utilityFunctionObjects);
+        fields (p U k omega);
+        executeControl timeStep;
+        executeInterval {{ force_write_interval }};
+        writeControl timeStep;
+        writeInterval {{ force_write_interval }};
+    }
+    yPlus
+    {
+        type yPlus;
+        libs (fieldFunctionObjects);
+        patches (hull);
+        writeFields yes;
+        executeControl writeTime;
+        writeControl writeTime;
+    }
+    wallShearStress
+    {
+        type wallShearStress;
+        libs (fieldFunctionObjects);
+        patches (hull);
+        writeFields yes;
+        executeControl timeStep;
+        executeInterval {{ force_write_interval }};
+        writeControl writeTime;
+    }
+    cp
+    {
+        type pressure;
+        libs (fieldFunctionObjects);
+        executeControl timeStep;
+        executeInterval {{ force_write_interval }};
+        writeControl writeTime;
+        result cp;
+        mode staticCoeff;
+        rho rhoInf;
+        rhoInf {{ density_kg_m3 }};
+        U U;
+        UInf {{ speed_vector }};
+        pInf 0;
+    }
+    fieldAverage
+    {
+        type fieldAverage;
+        libs (fieldFunctionObjects);
+        executeControl timeStep;
+        executeInterval {{ force_write_interval }};
+        writeControl writeTime;
+        fields
+        (
+            U { mean on; prime2Mean on; base time; window {{ averaging_window_time_s }}; windowType approximate; }
+            p { mean on; prime2Mean off; base time; window {{ averaging_window_time_s }}; windowType approximate; }
+            cp { mean on; prime2Mean off; base time; window {{ averaging_window_time_s }}; windowType approximate; }
+            wallShearStress { mean on; prime2Mean off; base time; window {{ averaging_window_time_s }}; windowType approximate; }
+        );
+    }
+    fieldMinMax
+    {
+        type fieldMinMax;
+        libs (fieldFunctionObjects);
+        executeControl writeTime;
+        writeControl writeTime;
+        fields (p U k omega);
+    }
+}
